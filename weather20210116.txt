@@ -18,19 +18,16 @@ class Weather(Producer):
     """Defines a simulated weather model"""
 
     status = IntEnum(
-        "status", "sunny partly_cloudy cloudy windy precipitation", start=0
-    )
-
-    rest_proxy_url = "http://localhost:8082"
-    #rest_proxy_url = "PLAINTEXT://localhost:9092"
-
+        "status", "sunny partly_cloudy cloudy windy precipitation", start=0)
+	
+	   rest_proxy_url = "http://localhost:8082"
 
     key_schema = None
     value_schema = None
 
     winter_months = set((0, 1, 2, 3, 10, 11))
     summer_months = set((6, 7, 8))
-
+    
     def __init__(self, month):
         #
         #
@@ -39,19 +36,16 @@ class Weather(Producer):
         #
         #
         super().__init__(
-            topic_name = f"CTAProducersWeather", # TODO: Come up with a better topic name
+            "CTAProducersWeather", # TODO: Come up with a better topic name
             key_schema=Weather.key_schema,
             value_schema=Weather.value_schema,
-            num_partitions=1,
-            num_replicas=1,
         )
-
 
         self.status = Weather.status.sunny
         self.temp = 70.0
         if month in Weather.winter_months:
             self.temp = 40.0
-        elif month in Weather.summer_months:
+	            elif month in Weather.summer_months:
             self.temp = 85.0
 
         if Weather.key_schema is None:
@@ -65,8 +59,7 @@ class Weather(Producer):
             with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as f:
                 Weather.value_schema = json.load(f)
 
-
-   def _set_weather(self, month):
+    def _set_weather(self, month):
         """Returns the current weather"""
         mode = 0.0
         if month in Weather.winter_months:
@@ -78,52 +71,19 @@ class Weather(Producer):
 
     def run(self, month):
         self._set_weather(month)
-
-        #
+        
+              #
         #
         # TODO: Complete the function by posting a weather event to REST Proxy. Make sure to
         # specify the Avro schemas and verify that you are using the correct Content-Type header.
+        #
+        #
         #https://docs.confluent.io/platform/current/tutorials/examples/clients/docs/rest- proxy.html
         # https://docs.confluent.io/platform/current/kafka-rest/quickstart.html
         
-        #
-        logger.info("weather kafka proxy integration incomplete - skipping")
-        #resp = requests.post(
-        #    #
-        #    #
-        #    # TODO: What URL should be POSTed to?
-        #    #
-        #    #
-        #    f"{Weather.rest_proxy_url}/TODO",
-        #    #
-        #    #
-        #    # TODO: What Headers need to bet set?
-        #    #
-        #    # https://docs.confluent.io/current/kafka-rest/api.html#content-types
-        #headers={"Content-Type": "TODO"},
-        # See: https://docs.confluent.io/current/kafka-rest/api.html#content-types
-        headers = {"Content_Type": "application/vnd.kafka.avro.v2+json"}
         
+        headers = {"Content-Type": "application/vnd.kafka.avro.v2+json"}
         
-                                    
-        
-        print(f"weather line 100 self topics name,{self.topic_name}")
-        print(f"temp,{self.temp}")
-        print(f"status name,{self.status.name}") 
-        print(f"status,{self.status}")
-        print(f"headers,{headers}")
-
-        
-        #    data=json.dumps(
-        #        {
-        #            #
-        #            #
-        #            # TODO: Provide key schema, value schema, and records
-        #            #
-        #            #
-        #        }
-        #    ),
-        #)
         data = {"key_schema": json.dumps(Weather.key_schema),
                    "value_schema":json.dumps(Weather.value_schema),
                    "records": [
@@ -139,38 +99,29 @@ class Weather(Producer):
                    ]
                }
         
-        print(data)        
-        #data = {
-        #    "value_schema": self.value_schema,
-        #    "records": [{"temperature" : self.temp,
-        #                 "status" : self.status.name}]}
         resp = requests.post(
-            f"{Weather.rest_proxy_url}/topics/self.topic_name",  # TODO
-            headers=headers,
-            data=json.dumps(data))
+            f"{Weather.rest_proxy_url}/topics/self.topicname",  # TODO
+            data=json.dumps(data),
+            headers=headers,)
+        
 
-        print("wealther line 123")
-	#resp.raise_for_status()
+
+
         try:
             resp.raise_for_status()
-                
         except:
             print(f"Failed to send data to REST Proxy {json.dumps(resp.json(), indent=2)}")
+            logger.info("weather kafka proxy integration incomplete - skipping")
 
-        else: 
-            #print(f"weather line 158,{json.dumps(data)}")
-            #print(f"Sent data to REST Proxy weather line 159, {json.dumps(resp.json(), indent=2)}")
-            logger.debug(
+        print(f"Sent data to REST Proxy {json.dumps(resp.json(), indent=2)}")
+        print(f"Sent data content to rest proxy,{data}")
+
+        logger.debug(
             "sent weather data to kafka, temp: %s, status: %s",
             self.temp,
             self.status.name,)
-        
-             
 
 
 
-
-
-
-        print("weather line 138")
-
+    
+    
