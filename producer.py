@@ -32,18 +32,28 @@ class Producer:
         self.value_schema = value_schema
         self.num_partitions = num_partitions
         self.num_replicas = num_replicas
-            self.broker_properties = AdminClient({
+     
+            
+
+        #
+        #
+        # TODO: Configure the broker properties below. Make sure to reference the project README
+        # and use the Host URL for Kafka and Schema Registry!
+        #
+        #
+        # See: https://docs.confluent.io/current/clients/confluent-kafka-python/#confluent_kafka.admin.NewTopic
+        # See: https://docs.confluent.io/current/installation/configuration/topic-configs.html
+        # configuration for avro producer and adminclient are different
+   
+
+        self.broker_properties = AdminClient({
             "bootstrap.servers": "PLAINTEXT://localhost:9092"})
         
         self.avro_config_properties = {
             "bootstrap.servers": "PLAINTEXT://localhost:9092",
             "schema.registry.url": "http://localhost:8081"}
           
-                                   
-    
-        
-        
-
+	  
         # If the topic does not already exist, try to create it
         
         if self.topic_name not in Producer.existing_topics:
@@ -56,7 +66,11 @@ class Producer:
         # TODO: Configure the AvroProducer
         #https://docs.confluent.io/clients-confluent-kafka-python/current/index.html#ak-producer 
        
-               
+
+   
+        
+        
+        
         #while True:
         #
         # TODO: Replace with an AvroProducer produce. Make sure to specify the schema!
@@ -64,15 +78,16 @@ class Producer:
         #       See: https://docs.confluent.io/current/clients/confluent-kafka-python/index.html?highlight=loads#confluent_kafka.avro.AvroProducer
         #https://medium.com/better-programming/avro-producer-with-python-and-confluent-kafka-library-4a1a2ed91a24 
         # # good practice domain naming convention
-        # domain,model,event type 
+	        # domain,model,event type 
         
     
     
         self.producer = AvroProducer(self.avro_config_properties,
-        default_key_schema = self.key_schema,                                                       
-	default_value_schema =  self.value_schema)
-	
-	    
+        default_key_schema = self.key_schema,                                                       default_value_schema =  self.value_schema)
+            
+            
+   
+    
     def create_topic(self):
         """Creates the producer topic if it does not already exist"""
         #
@@ -90,21 +105,24 @@ class Producer:
     # See: https://docs.confluent.io/current/installation/configuration/topic-configs.html
     #https://stackoverflow.com/questions/26021541/how-to-programmatically-create-a-topic-in-apache-kafka-using-python
     #futures = #20201205 
-    #configured clean up policy, comppression tupes, retention, and delete dalay 
+       #configured clean up policy, comppression tupes, retention, and delete dalay 
     # to hadle topic closing  
-   
         
+        print(f"topic,{self.topic_name}") 
+        print(f"num_partitions,{self.num_partitions}")
+        print(f"replication_factor,{self.num_replicas}")
+    
         futures = self.broker_properties.create_topics([NewTopic( 
-        #self.broker_properties.create_topics([NewTopic(
+        
         topic = self.topic_name,
       
-             num_partitions = self.num_partitions,
+        num_partitions = self.num_partitions,
         replication_factor = self.num_replicas, 
-        config = {
-            "cleanup.policy": "delete",
-            "compression.type": "gzip",
-            "delete.retention.ms": "2000",
-            "file.delete.delay.ms": "2000"}
+        #config = {
+        #    "cleanup.policy": "delete",
+        #    "compression.type": "gzip",
+        #    "delete.retention.ms": "2000",
+        #    "file.delete.delay.ms": "2000"}
             ) ] ) 
     
         
@@ -113,10 +131,13 @@ class Producer:
                 future.result()
                 #print("topic created")
             except Exception as e:
-                print(f"failed to create topic {topic_name}: {e}")
+	    print(f"failed to create topic {topic_name}: {e}")
                 logger.info("topic creation kafka integration incompleted - skipping")
                 raise
 
+
+        
+        
 
     def time_millis(self):
         return int(round(time.time() * 1000))
@@ -139,13 +160,14 @@ class Producer:
          #   }
 	
         if self.producer is not None:
-            logger.debug("flushing producer...")
+	           logger.debug("flushing producer...")
             self.producer.flush()
         else: 
             logger.info("producer close incomplete - skipping")
 
 
+        
+
     def time_millis(self):
         """Use this function to get the key for Kafka Events"""
         return int(round(time.time() * 1000))
-   
