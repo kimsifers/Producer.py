@@ -18,17 +18,17 @@ class Weather(Producer):
     """Defines a simulated weather model"""
 
     status = IntEnum(
-        "status", "sunny partly_cloudy cloudy windy precipitation", start=0)
-	
-	   rest_proxy_url = "http://localhost:8082"
+        "status", "sunny partly_cloudy cloudy windy precipitation", start=0
+    )
+
+    rest_proxy_url = "http://localhost:8082"
 
     key_schema = None
     value_schema = None
 
     winter_months = set((0, 1, 2, 3, 10, 11))
     summer_months = set((6, 7, 8))
-    
-    def __init__(self, month):
+def __init__(self, month):
         #
         #
         # TODO: Complete the below by deciding on a topic name, number of partitions, and number of
@@ -45,7 +45,7 @@ class Weather(Producer):
         self.temp = 70.0
         if month in Weather.winter_months:
             self.temp = 40.0
-	            elif month in Weather.summer_months:
+        elif month in Weather.summer_months:
             self.temp = 85.0
 
         if Weather.key_schema is None:
@@ -58,8 +58,7 @@ class Weather(Producer):
         if Weather.value_schema is None:
             with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as f:
                 Weather.value_schema = json.load(f)
-
-    def _set_weather(self, month):
+		   def _set_weather(self, month):
         """Returns the current weather"""
         mode = 0.0
         if month in Weather.winter_months:
@@ -80,8 +79,7 @@ class Weather(Producer):
         #
         #https://docs.confluent.io/platform/current/tutorials/examples/clients/docs/rest- proxy.html
         # https://docs.confluent.io/platform/current/kafka-rest/quickstart.html
-        
-        
+	        
         headers = {"Content-Type": "application/vnd.kafka.avro.v2+json"}
         
         data = {"key_schema": json.dumps(Weather.key_schema),
@@ -98,16 +96,17 @@ class Weather(Producer):
                        }
                    ]
                }
+
         
         resp = requests.post(
             f"{Weather.rest_proxy_url}/topics/self.topicname",  # TODO
             data=json.dumps(data),
             headers=headers,)
-        
+	
+	
+	
 
 
-        #changed try statements fopr 20210118 testing 
-       
         try:
             resp.raise_for_status()
             print(f"Sent data content to rest proxy,{data}")
@@ -123,6 +122,8 @@ class Weather(Producer):
             "sent weather data to kafka, temp: %s, status: %s",
             self.temp,
             self.status.name,)
+
+
 
 
 
